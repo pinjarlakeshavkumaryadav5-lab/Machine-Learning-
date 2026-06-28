@@ -1,0 +1,56 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Sample Dataset
+data = {
+    "income": [50000, 20000, 30000, 80000, 100000, 45000, 60000, 35000],
+    "loan": [10000, 15000, 12000, 20000, 25000, 8000, 18000, 9000],
+    "credit_score": [700, 500, 650, 800, 750, 680, 720, 610],
+    "approved": [1, 0, 1, 1, 1, 1, 1, 0]
+}
+
+df = pd.DataFrame(data)
+
+print("Dataset")
+print(df)
+
+# Features and Target
+X = df[["income", "loan", "credit_score"]]
+y = df["approved"]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Model
+model = LogisticRegression()
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+predictions = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, predictions)
+
+print("\nPredictions:", predictions)
+print("\nAccuracy:", accuracy)
+
+print("\nClassification Report")
+print(classification_report(y_test, predictions))
+
+# New Customer Prediction
+new_customer = [[70000, 15000, 730]]
+
+result = model.predict(new_customer)
+
+if result[0] == 1:
+    print("\nLoan Status : Approved")
+else:
+    print("\nLoan Status : Rejected")
