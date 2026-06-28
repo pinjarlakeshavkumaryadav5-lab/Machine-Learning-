@@ -1,0 +1,103 @@
+import os
+import librosa
+import numpy as np
+import soundfile
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Extract MFCC Features
+def extract_feature(file_name):
+    with soundfile.SoundFile(file_name) as sound:
+        audio = sound.read(dtype="float32")
+        sample_rate = sound.samplerate
+
+        mfcc = np.mean(
+            librosa.feature.mfcc(
+                y=audio,
+                sr=sample_rate,
+                n_mfcc=40
+            ).T,
+            axis=0
+        )
+
+    return mfcc
+
+
+# Dataset Folder
+dataset_path = "dataset"
+
+features = []
+labels = []
+
+print("Loading Dataset...")
+
+for emotion in os.listdir(dataset_path):
+
+    emotion_folder = os.path.join(dataset_path, emotion)
+
+    if os.path.isdir(emotion_folder):
+
+        for file in os.listdir(emotion_folder):
+
+            if file.endswith(".wav"):
+
+                file_path = os.path.join(emotion_folder, file)
+
+                feature = extract_feature(file_path)
+
+                features.append(feature)
+                labels.append(emotion)
+
+print("Dataset Loaded Successfully")
+
+X = np.array(features)
+y = np.array(labels)
+
+# Train Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=42
+)
+
+# MLP Model
+model = MLPClassifier(
+    hidden_layer_sizes=(300,),
+    learning_rate='adaptive',
+    max_iter=500
+)
+
+print("Training Model...")
+
+model.fit(X_train, y_train)
+
+print("Training Completed")
+
+# Prediction
+predictions = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, predictions)
+
+print("\nAccuracy :", accuracy)
+
+print("\nClassification Report")
+
+print(classification_report(y_test, predictions))
+
+# Predict Single Audio
+
+audio_file = "sample.wav"
+
+if os.path.exists(audio_file):
+
+    feature = extract_feature(audio_file)
+
+    prediction = model.predict([feature])
+
+    print("\nPredicted Emotion :", prediction[0])
+
+else:
+
+    print("\nPlace a sample.wav file to test prediction.")
