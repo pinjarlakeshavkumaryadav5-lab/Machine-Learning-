@@ -1,0 +1,64 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Sample Dataset
+data = {
+    "age": [25, 40, 35, 50, 60, 30, 45, 55, 38, 65],
+    "bp": [120, 140, 130, 150, 160, 125, 145, 155, 135, 170],
+    "sugar": [80, 120, 100, 140, 150, 85, 130, 145, 95, 160],
+    "cholesterol": [180, 240, 210, 260, 280, 190, 230, 250, 200, 290],
+    "disease": [0, 1, 0, 1, 1, 0, 1, 1, 0, 1]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+print("Dataset")
+print(df)
+
+# Features and Target
+X = df[["age", "bp", "sugar", "cholesterol"]]
+y = df["disease"]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Build Model
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+# Train Model
+model.fit(X_train, y_train)
+
+# Predict
+predictions = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, predictions)
+
+print("\nAccuracy:", accuracy)
+
+print("\nClassification Report")
+print(classification_report(y_test, predictions))
+
+print("\nConfusion Matrix")
+print(confusion_matrix(y_test, predictions))
+
+# Predict New Patient
+new_patient = [[42, 138, 110, 220]]
+
+prediction = model.predict(new_patient)
+
+if prediction[0] == 1:
+    print("\nPrediction: Disease Detected")
+else:
+    print("\nPrediction: No Disease Detected")
